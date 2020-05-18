@@ -43,7 +43,8 @@ perfCompareSuite('rrule', function(perf, ICAL) {
 
     // Apple iCal rules
     "FREQ=MONTHLY;BYDAY=MO,TU,WE,TH,FR;BYSETPOS=3",
-    "FREQ=MONTHLY;BYDAY=SA,SU;BYMONTH=11;BYSETPOS=-1"
+    "FREQ=MONTHLY;BYDAY=SA,SU;BYMONTH=11;BYSETPOS=-1",
+    "FREQ=MONTHLY;BYDAY=3MO,3TU;BYSETPOS=3"
 
   ].forEach(function(rulestring) {
     perf.test(rulestring, function() {
