@@ -34,6 +34,7 @@
               self.icalObject = lib;
               if (!self.icalObject || Object.keys(self.icalObject).length === 0) {
                 console.log('Version ICAL_' + self.icalVersion + ' not found, skipping');
+                self.icalObject = null;
                 return callback(null);
               }
               callback(self.icalObject);
