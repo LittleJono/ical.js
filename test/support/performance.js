@@ -32,8 +32,8 @@
             var self = this;
             testSupport.requireBenchmarkBuild(this.icalVersion, function(lib) {
               self.icalObject = lib;
-              if (!self.icalObject) {
-                console.log('Version ICAL_' + self.icalVersion + ' not found, skipping');
+              if (!self.icalObject || Object.keys(self.icalObject).length === 0) {
+                throw new Error('can\'t find iCal');
               }
               callback(self.icalObject);
             });
