@@ -54,6 +54,7 @@ suite('recur_iterator', function() {
     if (includeTime) {
       list.unshift(start);
       list.push(end);
+
     } else {
       list.unshift(createDay(start));
       list.push(createDay(end));
@@ -226,6 +227,38 @@ suite('recur_iterator', function() {
       assert.deepEqual(dates, options.dates || []);
     });
   }
+
+  function testRRULEWithError(ruleString, options, expectedError) {
+    var runner = options.only ? test.only : test;
+    runner(ruleString, function() {
+      function throwsError () {
+        if (!options.dtStart) {
+          options.dtStart = options.dates[0];
+        }
+  
+        var start = ICAL.Time.fromString(options.dtStart);
+        var recur = ICAL.Recur.fromString(ruleString);
+        var iterator = recur.iterator(start);
+  
+        var inc = 0;
+        var dates = [];
+        var next, max;
+  
+        if ('max' in options) {
+          max = options.max;
+        } else if (recur.isFinite()) {
+          max = options.dates.length + 1;
+        } else {
+          max = options.dates.length;
+        }
+        while (inc++ < max && (next = iterator.next())) {
+          dates.push(next.toString());
+        }
+      }
+      assert.throws(throwsError, Error, expectedError);
+    });
+  }
+
   testRRULE.only = function(ruleString, options) {
     options.only = true;
     testRRULE(ruleString, options);
@@ -1027,8 +1060,579 @@ suite('recur_iterator', function() {
         ]
       });
       */
+    });
+    suite('BYSETPOS validation', () => {
+      suite('valid rules', () => {
+        testRRULE('FREQ=MONTHLY;BYDAY=MO,TU,WE,TH,FR,SA,SU;BYSETPOS=25', {
+          dates: [
+            "2013-01-25",
+            "2013-02-25",
+            "2013-03-25",
+            "2013-04-25",
+            "2013-05-25",
+            "2013-06-25",
+            "2013-07-25",
+            "2013-08-25",
+            "2013-09-25",
+            "2013-10-25",
+          ],
+          max: 10,
+        });
+        testRRULE('FREQ=MONTHLY;BYDAY=1MO,1TU,1WE,1TH,1FR,1SA,1SU;BYSETPOS=6', {
+          dates: [
+            "2013-02-06",
+            "2013-03-06",
+            "2013-04-06",
+            "2013-05-06",
+            "2013-06-06",
+            "2013-07-06",
+            "2013-08-06",
+            "2013-09-06",
+            "2013-10-06",
+            "2013-11-06",
+          ],
+          max: 10,
+        });
+        testRRULE('FREQ=MONTHLY;BYDAY=4MO,3TU,2WE,1TH,FR;BYSETPOS=9', {
+          dates: [
+            "2013-03-29",
+            "2013-05-31",
+            "2013-08-30",
+            "2013-11-29",
+            "2014-01-31",
+            "2014-05-30",
+          ],
+          max: 6,
+        });
+        testRRULE('FREQ=MONTHLY;BYDAY=MO;BYSETPOS=5', {
+          dates: [
+            "2013-04-29",
+            "2013-07-29",
+            "2013-09-30",
+            "2013-12-30",
+            "2014-03-31",
+            "2014-06-30",
+          ],
+          max: 6,
+        });
+        testRRULE('FREQ=MONTHLY;BYDAY=1MO;BYSETPOS=1', {
+          dates: [
+            "2013-02-04",
+            "2013-03-04",
+            "2013-04-01",
+            "2013-05-06",
+            "2013-06-03",
+            "2013-07-01",
+          ],
+          max: 6,
+        });
+        testRRULE('FREQ=MONTHLY;BYDAY=1MO,TU;BYSETPOS=3', {
+          dates: [
+            "2013-02-12",
+            "2013-03-12",
+            "2013-04-09",
+            "2013-05-14",
+            "2013-06-11",
+            "2013-07-09",
+          ],
+          max: 6,
+        });
+        testRRULE('FREQ=MONTHLY;BYDAY=WE,2TH,3FR;BYSETPOS=7', {
+          dates: [
+            "2013-01-30",
+            "2013-05-29",
+            "2013-07-31",
+            "2013-10-30",
+            "2014-01-29",
+            "2014-04-30",
+          ],
+          max: 6,
+        });
+        testRRULE('FREQ=MONTHLY;BYDAY=2MO,TU,WE,4TH;BYSETPOS=10', {
+          dates: [
+            "2013-01-24",
+            "2013-02-28",
+            "2013-03-28",
+            "2013-04-25",
+            "2013-05-28",
+            "2013-06-27",
+          ],
+          max: 6,
+        });
+        testRRULE('FREQ=MONTHLY;BYDAY=2MO,TU,WE,5TH;BYSETPOS=12', {
+          dates: [
+            "2013-01-31",
+            "2013-10-31",
+            "2014-07-31",
+            "2015-12-31",
+            "2016-03-31",
+            "2017-08-31",
+          ],
+          max: 6,
+        });
+        testRRULE('FREQ=MONTHLY;BYDAY=-2MO,TU,WE,-5TH;BYSETPOS=12', {
+          dates: [
+            "2013-10-30",
+            "2014-07-30",
+            "2015-12-30",
+            "2016-03-30",
+            "2017-08-30",
+            "2018-05-30",
+          ],
+          max: 6,
+        });
+        testRRULE('FREQ=MONTHLY;BYDAY=MO,-3TU;BYSETPOS=5', {
+          dates: [
+            "2013-01-28",
+            "2013-02-25",
+            "2013-03-25",
+            "2013-04-22",
+            "2013-05-27",
+            "2013-06-24",
+          ],
+          max: 6,
+        });
+        testRRULE('FREQ=MONTHLY;BYDAY=1MO,WE,-3TU;BYSETPOS=5', {
+          dates: [
+            "2013-02-20",
+            "2013-03-20",
+            "2013-04-17",
+            "2013-05-15",
+            "2013-06-19",
+            "2013-07-17",
+          ],
+          max: 6,
+        });
+      });
 
+      suite('invalid rules', () => {
+        testRRULEWithError('FREQ=MONTHLY;BYDAY=MO,TU,WE,TH,FR,SA,SU;BYSETPOS=40', {
+          dates: [
+            "2013-01-15",
+            "2013-01-21",
+            "2013-02-19",
+            "2013-03-19",
+            "2013-04-16",
+            "2013-05-21",
+          ],
+          max: 6,
+        });
+        testRRULEWithError('FREQ=MONTHLY;BYDAY=1MO,1TU,1WE,1TH,1FR,1SA,1SU;BYSETPOS=8', {
+          dates: [
+            "2013-01-15",
+            "2013-01-21",
+            "2013-02-19",
+            "2013-03-19",
+            "2013-04-16",
+            "2013-05-21",
+          ],
+          max: 6,
+        });
+        testRRULEWithError('FREQ=MONTHLY;BYDAY=4MO,3TU,2WE,1TH,FR;BYSETPOS=10', {
+          dates: [
+            "2013-01-15",
+            "2013-01-21",
+            "2013-02-19",
+            "2013-03-19",
+            "2013-04-16",
+            "2013-05-21",
+          ],
+          max: 6,
+        });
+        testRRULEWithError('FREQ=MONTHLY;BYDAY=MO;BYSETPOS=6', {
+          dates: [
+            "2013-01-15",
+            "2013-01-21",
+            "2013-02-19",
+            "2013-03-19",
+            "2013-04-16",
+            "2013-05-21",
+          ],
+          max: 6,
+        });
+        testRRULEWithError('FREQ=MONTHLY;BYDAY=1MO;BYSETPOS=6', {
+          dates: [
+            "2013-01-15",
+            "2013-01-21",
+            "2013-02-19",
+            "2013-03-19",
+            "2013-04-16",
+            "2013-05-21",
+          ],
+          max: 6,
+        });
+        testRRULEWithError('FREQ=MONTHLY;BYDAY=1MO,TU;BYSETPOS=8', {
+          dates: [
+            "2013-01-15",
+            "2013-01-21",
+            "2013-02-19",
+            "2013-03-19",
+            "2013-04-16",
+            "2013-05-21",
+          ],
+          max: 6,
+        });
+        testRRULEWithError('FREQ=MONTHLY;BYDAY=WE,2TH,3FR;BYSETPOS=8', {
+          dates: [
+            "2013-01-15",
+            "2013-01-21",
+            "2013-02-19",
+            "2013-03-19",
+            "2013-04-16",
+            "2013-05-21",
+          ],
+          max: 6,
+        });
+        testRRULEWithError('FREQ=MONTHLY;BYDAY=2MO,TU,WE,4TH;BYSETPOS=20', {
+          dates: [
+            "2013-01-15",
+            "2013-01-21",
+            "2013-02-19",
+            "2013-03-19",
+            "2013-04-16",
+            "2013-05-21",
+          ],
+          max: 6,
+        });
+        testRRULEWithError('FREQ=MONTHLY;BYDAY=2MO,TU,WE,5TH;BYSETPOS=13', {
+          dates: [
+            "2013-01-15",
+            "2013-01-21",
+            "2013-02-19",
+            "2013-03-19",
+            "2013-04-16",
+            "2013-05-21",
+          ],
+          max: 6,
+        });
+        testRRULEWithError('FREQ=MONTHLY;BYDAY=MO,-3TU;BYSETPOS=7', {
+          dates: [
+            "2013-01-15",
+            "2013-01-21",
+            "2013-02-19",
+            "2013-03-19",
+            "2013-04-16",
+            "2013-05-21",
+          ],
+          max: 6,
+        });
+        testRRULEWithError('FREQ=MONTHLY;BYDAY=MO,-1TU,-4WE,5TH;BYSETPOS=10', {
+          dates: [
+            "2013-01-15",
+            "2013-01-21",
+            "2013-02-19",
+            "2013-03-19",
+            "2013-04-16",
+            "2013-05-21",
+          ],
+          max: 6,
+        });
+      });
+      suite('valid multiple BYSETPOS values', () => {
+        testRRULE('FREQ=MONTHLY;BYDAY=MO,TU,WE,TH,FR,SA,SU;BYSETPOS=10,25,31', {
+          dates: [
+            "2013-05-25",
+            "2013-05-31",
+            "2013-06-10",
+            "2013-06-25",
+            "2013-07-10",
+            "2013-07-25",
+            "2013-07-31",
+            "2013-08-10",
+            "2013-08-25",
+            "2013-08-31",
+          ],
+          max: 10,
+        });
+        testRRULE('FREQ=MONTHLY;BYDAY=1MO,1TU,1WE,1TH,1FR,1SA,1SU;BYSETPOS=1,3,6', {
+          dates: [
+            "2013-06-01",
+            "2013-06-03",
+            "2013-06-06",
+            "2013-07-01",
+            "2013-07-03",
+            "2013-07-06",
+            "2013-08-01",
+            "2013-08-03",
+            "2013-08-06",
+            "2013-09-01",
+          ],
+          max: 10,
+        });
+        testRRULE('FREQ=MONTHLY;BYDAY=4MO,3TU,2WE,1TH,FR;BYSETPOS=1,4,8', {
+          dates: [
+            "2013-05-27",
+            "2013-06-06",
+            "2013-06-14",
+            "2013-06-28",
+            "2013-07-04",
+            "2013-07-12",
+            "2013-07-26",
+            "2013-08-01",
+            "2013-08-14",
+            "2013-08-26",
+          ],
+          max: 10,
+        });
+        testRRULE('FREQ=MONTHLY;BYDAY=MO;BYSETPOS=1,3,5', {
+          dates: [
+            "2013-06-03",
+            "2013-06-17",
+            "2013-07-01",
+            "2013-07-15",
+            "2013-07-29",
+            "2013-08-05",
+            "2013-08-19",
+            "2013-09-02",
+            "2013-09-16",
+            "2013-09-30",
+          ],
+          max: 10,
+        });
+        testRRULE('FREQ=MONTHLY;BYDAY=1MO;BYSETPOS=1', {
+          dates: [
+            "2013-06-03",
+            "2013-07-01",
+            "2013-08-05",
+            "2013-09-02",
+            "2013-10-07",
+            "2013-11-04",
+            "2013-12-02",
+            "2014-01-06",
+            "2014-02-03",
+            "2014-03-03",
+          ],
+          max: 10,
+        });
+        testRRULE('FREQ=MONTHLY;BYDAY=1MO,TU;BYSETPOS=1,2,3', {
+          dates: [
+            "2013-06-03",
+            "2013-06-04",
+            "2013-06-11",
+            "2013-07-01",
+            "2013-07-02",
+            "2013-07-09",
+            "2013-08-05",
+            "2013-08-06",
+            "2013-08-13",
+            "2013-09-02",
+          ],
+          max: 10,
+        });
+        testRRULE('FREQ=MONTHLY;BYDAY=WE,2TH,3FR;BYSETPOS=2,4,7', {
+          dates: [
+            "2013-05-29",
+            "2013-06-12",
+            "2013-06-19",
+            "2013-07-10",
+            "2013-07-17",
+            "2013-07-31",
+            "2013-08-08",
+            "2013-08-16",
+            "2013-09-11",
+            "2013-09-18",
+          ],
+          max: 10,
+        });
+        testRRULE('FREQ=MONTHLY;BYDAY=2MO,TU,WE,4TH;BYSETPOS=4,8,12', {
+          dates: [
+            "2013-05-22",
+            "2013-06-11",
+            "2013-06-25",
+            "2013-07-09",
+            "2013-07-23",
+            "2013-07-31",
+            "2013-08-13",
+            "2013-08-22",
+            "2013-09-10",
+            "2013-09-24",
+          ],
+          max: 10,
+        });
+        testRRULE('FREQ=MONTHLY;BYDAY=2MO,TU,WE,5TH;BYSETPOS=3,9,10', {
+          dates: [
+            "2013-05-28",
+            "2013-05-29",
+            "2013-06-10",
+            "2013-06-26",
+            "2013-07-08",
+            "2013-07-24",
+            "2013-07-30",
+            "2013-08-12",
+            "2013-08-28",
+            "2013-08-29",
+          ],
+          max: 10,
+        });
+        testRRULE('FREQ=MONTHLY;BYDAY=MO,-3TU;BYSETPOS=2,4,5', {
+          dates: [
+            "2013-05-27",
+            "2013-06-10",
+            "2013-06-17",
+            "2013-06-24",
+            "2013-07-08",
+            "2013-07-16",
+            "2013-07-22",
+            "2013-08-12",
+            "2013-08-19",
+            "2013-08-26",
+          ],
+          max: 10,
+        });
+      });
 
+      suite('invalid multiple BYSETPOS values', () => {
+        testRRULEWithError('FREQ=MONTHLY;BYDAY=MO,TU,WE,TH,FR,SA,SU;BYSETPOS=10,25,31,42', {
+          dates: [
+            "2013-05-25",
+            "2013-05-31",
+            "2013-06-10",
+            "2013-06-25",
+            "2013-07-10",
+            "2013-07-25",
+            "2013-07-31",
+            "2013-08-10",
+            "2013-08-25",
+            "2013-08-31",
+          ],
+          max: 10,
+        });
+        testRRULEWithError('FREQ=MONTHLY;BYDAY=1MO,1TU,1WE,1TH,1FR,1SA,1SU;BYSETPOS=1,3,6,42', {
+          dates: [
+            "2013-06-01",
+            "2013-06-03",
+            "2013-06-06",
+            "2013-07-01",
+            "2013-07-03",
+            "2013-07-06",
+            "2013-08-01",
+            "2013-08-03",
+            "2013-08-06",
+            "2013-09-01",
+          ],
+          max: 10,
+        });
+        testRRULEWithError('FREQ=MONTHLY;BYDAY=4MO,3TU,2WE,1TH,FR;BYSETPOS=1,4,8,42', {
+          dates: [
+            "2013-05-27",
+            "2013-06-06",
+            "2013-06-14",
+            "2013-06-28",
+            "2013-07-04",
+            "2013-07-12",
+            "2013-07-26",
+            "2013-08-01",
+            "2013-08-14",
+            "2013-08-26",
+          ],
+          max: 10,
+        });
+        testRRULEWithError('FREQ=MONTHLY;BYDAY=MO;BYSETPOS=1,3,5,42', {
+          dates: [
+            "2013-06-03",
+            "2013-06-17",
+            "2013-07-01",
+            "2013-07-15",
+            "2013-07-29",
+            "2013-08-05",
+            "2013-08-19",
+            "2013-09-02",
+            "2013-09-16",
+            "2013-09-30",
+          ],
+          max: 10,
+        });
+        testRRULEWithError('FREQ=MONTHLY;BYDAY=1MO;BYSETPOS=1,42', {
+          dates: [
+            "2013-06-03",
+            "2013-07-01",
+            "2013-08-05",
+            "2013-09-02",
+            "2013-10-07",
+            "2013-11-04",
+            "2013-12-02",
+            "2014-01-06",
+            "2014-02-03",
+            "2014-03-03",
+          ],
+          max: 10,
+        });
+        testRRULEWithError('FREQ=MONTHLY;BYDAY=1MO,TU;BYSETPOS=1,2,3,42', {
+          dates: [
+            "2013-06-03",
+            "2013-06-04",
+            "2013-06-11",
+            "2013-07-01",
+            "2013-07-02",
+            "2013-07-09",
+            "2013-08-05",
+            "2013-08-06",
+            "2013-08-13",
+            "2013-09-02",
+          ],
+          max: 10,
+        });
+        testRRULEWithError('FREQ=MONTHLY;BYDAY=WE,2TH,3FR;BYSETPOS=2,4,7,42', {
+          dates: [
+            "2013-05-29",
+            "2013-06-12",
+            "2013-06-19",
+            "2013-07-10",
+            "2013-07-17",
+            "2013-07-31",
+            "2013-08-08",
+            "2013-08-16",
+            "2013-09-11",
+            "2013-09-18",
+          ],
+          max: 10,
+        });
+        testRRULEWithError('FREQ=MONTHLY;BYDAY=2MO,TU,WE,4TH;BYSETPOS=4,8,12,42', {
+          dates: [
+            "2013-05-22",
+            "2013-06-11",
+            "2013-06-25",
+            "2013-07-09",
+            "2013-07-23",
+            "2013-07-31",
+            "2013-08-13",
+            "2013-08-22",
+            "2013-09-10",
+            "2013-09-24",
+          ],
+          max: 10,
+        });
+        testRRULEWithError('FREQ=MONTHLY;BYDAY=2MO,TU,WE,5TH;BYSETPOS=3,9,10,42', {
+          dates: [
+            "2013-05-28",
+            "2013-05-29",
+            "2013-06-10",
+            "2013-06-26",
+            "2013-07-08",
+            "2013-07-24",
+            "2013-07-30",
+            "2013-08-12",
+            "2013-08-28",
+            "2013-08-29",
+          ],
+          max: 10,
+        });
+        testRRULEWithError('FREQ=MONTHLY;BYDAY=MO,-3TU;BYSETPOS=2,4,5,42', {
+          dates: [
+            "2013-05-27",
+            "2013-06-10",
+            "2013-06-17",
+            "2013-06-24",
+            "2013-07-08",
+            "2013-07-16",
+            "2013-07-22",
+            "2013-08-12",
+            "2013-08-19",
+            "2013-08-26",
+          ],
+          max: 10,
+        });
+      });
     });
   });
 });
