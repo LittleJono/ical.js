@@ -54,7 +54,6 @@ suite('recur_iterator', function() {
     if (includeTime) {
       list.unshift(start);
       list.push(end);
-
     } else {
       list.unshift(createDay(start));
       list.push(createDay(end));
@@ -1216,7 +1215,7 @@ suite('recur_iterator', function() {
             "2013-05-21",
           ],
           max: 6,
-        });
+        }, 'Monthly BYSETPOS value larger than max count of viable events');
         testRRULEWithError('FREQ=MONTHLY;BYDAY=1MO,1TU,1WE,1TH,1FR,1SA,1SU;BYSETPOS=8', {
           dates: [
             "2013-01-15",
@@ -1227,7 +1226,7 @@ suite('recur_iterator', function() {
             "2013-05-21",
           ],
           max: 6,
-        });
+        }, 'Monthly BYSETPOS value larger than max count of viable events');
         testRRULEWithError('FREQ=MONTHLY;BYDAY=4MO,3TU,2WE,1TH,FR;BYSETPOS=10', {
           dates: [
             "2013-01-15",
@@ -1238,7 +1237,7 @@ suite('recur_iterator', function() {
             "2013-05-21",
           ],
           max: 6,
-        });
+        }, 'Monthly BYSETPOS value larger than max count of viable events');
         testRRULEWithError('FREQ=MONTHLY;BYDAY=MO;BYSETPOS=6', {
           dates: [
             "2013-01-15",
@@ -1249,7 +1248,7 @@ suite('recur_iterator', function() {
             "2013-05-21",
           ],
           max: 6,
-        });
+        }, 'Monthly BYSETPOS value larger than max count of viable events');
         testRRULEWithError('FREQ=MONTHLY;BYDAY=1MO;BYSETPOS=6', {
           dates: [
             "2013-01-15",
@@ -1260,7 +1259,7 @@ suite('recur_iterator', function() {
             "2013-05-21",
           ],
           max: 6,
-        });
+        }, 'Monthly BYSETPOS value larger than max count of viable events');
         testRRULEWithError('FREQ=MONTHLY;BYDAY=1MO,TU;BYSETPOS=8', {
           dates: [
             "2013-01-15",
@@ -1271,7 +1270,7 @@ suite('recur_iterator', function() {
             "2013-05-21",
           ],
           max: 6,
-        });
+        }, 'Monthly BYSETPOS value larger than max count of viable events');
         testRRULEWithError('FREQ=MONTHLY;BYDAY=WE,2TH,3FR;BYSETPOS=8', {
           dates: [
             "2013-01-15",
@@ -1282,7 +1281,7 @@ suite('recur_iterator', function() {
             "2013-05-21",
           ],
           max: 6,
-        });
+        }, 'Monthly BYSETPOS value larger than max count of viable events');
         testRRULEWithError('FREQ=MONTHLY;BYDAY=2MO,TU,WE,4TH;BYSETPOS=20', {
           dates: [
             "2013-01-15",
@@ -1293,7 +1292,7 @@ suite('recur_iterator', function() {
             "2013-05-21",
           ],
           max: 6,
-        });
+        }, 'Monthly BYSETPOS value larger than max count of viable events');
         testRRULEWithError('FREQ=MONTHLY;BYDAY=2MO,TU,WE,5TH;BYSETPOS=13', {
           dates: [
             "2013-01-15",
@@ -1304,7 +1303,7 @@ suite('recur_iterator', function() {
             "2013-05-21",
           ],
           max: 6,
-        });
+        }, 'Monthly BYSETPOS value larger than max count of viable events');
         testRRULEWithError('FREQ=MONTHLY;BYDAY=MO,-3TU;BYSETPOS=7', {
           dates: [
             "2013-01-15",
@@ -1315,7 +1314,7 @@ suite('recur_iterator', function() {
             "2013-05-21",
           ],
           max: 6,
-        });
+        }, 'Monthly BYSETPOS value larger than max count of viable events');
         testRRULEWithError('FREQ=MONTHLY;BYDAY=MO,-1TU,-4WE,5TH;BYSETPOS=10', {
           dates: [
             "2013-01-15",
@@ -1326,7 +1325,7 @@ suite('recur_iterator', function() {
             "2013-05-21",
           ],
           max: 6,
-        });
+        }, 'Monthly BYSETPOS value larger than max count of viable events');
       });
       suite('valid multiple BYSETPOS values', () => {
         testRRULE('FREQ=MONTHLY;BYDAY=MO,TU,WE,TH,FR,SA,SU;BYSETPOS=10,25,31', {
@@ -1496,7 +1495,7 @@ suite('recur_iterator', function() {
             "2013-08-31",
           ],
           max: 10,
-        });
+        }, 'Monthly BYSETPOS value larger than max count of viable events');
         testRRULEWithError('FREQ=MONTHLY;BYDAY=1MO,1TU,1WE,1TH,1FR,1SA,1SU;BYSETPOS=1,3,6,42', {
           dates: [
             "2013-06-01",
@@ -1511,7 +1510,7 @@ suite('recur_iterator', function() {
             "2013-09-01",
           ],
           max: 10,
-        });
+        }, 'Monthly BYSETPOS value larger than max count of viable events');
         testRRULEWithError('FREQ=MONTHLY;BYDAY=4MO,3TU,2WE,1TH,FR;BYSETPOS=1,4,8,42', {
           dates: [
             "2013-05-27",
@@ -1526,7 +1525,7 @@ suite('recur_iterator', function() {
             "2013-08-26",
           ],
           max: 10,
-        });
+        }, 'Monthly BYSETPOS value larger than max count of viable events');
         testRRULEWithError('FREQ=MONTHLY;BYDAY=MO;BYSETPOS=1,3,5,42', {
           dates: [
             "2013-06-03",
@@ -1541,7 +1540,7 @@ suite('recur_iterator', function() {
             "2013-09-30",
           ],
           max: 10,
-        });
+        }, 'Monthly BYSETPOS value larger than max count of viable events');
         testRRULEWithError('FREQ=MONTHLY;BYDAY=1MO;BYSETPOS=1,42', {
           dates: [
             "2013-06-03",
@@ -1556,7 +1555,7 @@ suite('recur_iterator', function() {
             "2014-03-03",
           ],
           max: 10,
-        });
+        }, 'Monthly BYSETPOS value larger than max count of viable events');
         testRRULEWithError('FREQ=MONTHLY;BYDAY=1MO,TU;BYSETPOS=1,2,3,42', {
           dates: [
             "2013-06-03",
@@ -1571,7 +1570,7 @@ suite('recur_iterator', function() {
             "2013-09-02",
           ],
           max: 10,
-        });
+        }, 'Monthly BYSETPOS value larger than max count of viable events');
         testRRULEWithError('FREQ=MONTHLY;BYDAY=WE,2TH,3FR;BYSETPOS=2,4,7,42', {
           dates: [
             "2013-05-29",
@@ -1586,7 +1585,7 @@ suite('recur_iterator', function() {
             "2013-09-18",
           ],
           max: 10,
-        });
+        }, 'Monthly BYSETPOS value larger than max count of viable events');
         testRRULEWithError('FREQ=MONTHLY;BYDAY=2MO,TU,WE,4TH;BYSETPOS=4,8,12,42', {
           dates: [
             "2013-05-22",
@@ -1601,7 +1600,7 @@ suite('recur_iterator', function() {
             "2013-09-24",
           ],
           max: 10,
-        });
+        }, 'Monthly BYSETPOS value larger than max count of viable events');
         testRRULEWithError('FREQ=MONTHLY;BYDAY=2MO,TU,WE,5TH;BYSETPOS=3,9,10,42', {
           dates: [
             "2013-05-28",
@@ -1616,7 +1615,7 @@ suite('recur_iterator', function() {
             "2013-08-29",
           ],
           max: 10,
-        });
+        }, 'Monthly BYSETPOS value larger than max count of viable events');
         testRRULEWithError('FREQ=MONTHLY;BYDAY=MO,-3TU;BYSETPOS=2,4,5,42', {
           dates: [
             "2013-05-27",
